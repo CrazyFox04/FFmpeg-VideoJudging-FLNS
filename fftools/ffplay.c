@@ -3826,6 +3826,7 @@ static void create_show_window() {
         }
         window = SDL_CreateWindow(program_name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, default_width,
                                   default_height, flags);
+        SDL_SetWindowTitle(window, window_title);
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
         if (!window) {
             av_log(NULL, AV_LOG_FATAL, "Failed to create window: %s", SDL_GetError());
@@ -3874,12 +3875,13 @@ int main(int argc, char** argv) {
     int flags, ret;
     VideoState* is;
 
+    ret = parse_options(NULL, argc, argv, options, opt_input_file);
+    parse_loglevel(argc, argv, options);
     create_show_window();
     
     init_dynload();
 
     av_log_set_flags(AV_LOG_SKIP_REPEATED);
-    parse_loglevel(argc, argv, options);
 
     /* register all codecs, demux and protocols */
 #if CONFIG_AVDEVICE
@@ -3892,7 +3894,6 @@ int main(int argc, char** argv) {
 
     show_banner(argc, argv, options);
 
-    ret = parse_options(NULL, argc, argv, options, opt_input_file);
     if (ret < 0)
         exit(ret == AVERROR_EXIT ? 0 : 1);
 
