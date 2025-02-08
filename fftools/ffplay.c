@@ -319,6 +319,7 @@ static int subtitle_disable;
 static const char* wanted_stream_spec[AVMEDIA_TYPE_NB] = {0};
 static int seek_by_bytes = -1;
 static float seek_interval = 10;
+static float slow_seek_interval = 1;
 static int display_disable;
 static int borderless;
 static int alwaysontop;
@@ -3439,9 +3440,17 @@ static void event_loop(VideoState* cur_stream) {
                         seek_chapter(cur_stream, -1);
                         break;
                     case SDLK_LEFT:
+                        if (SDL_GetModState() & KMOD_CTRL) {
+                            incr = slow_seek_interval ? -slow_seek_interval : -1.0;
+                            goto do_seek;
+                        }
                         incr = seek_interval ? -seek_interval : -10.0;
                         goto do_seek;
                     case SDLK_RIGHT:
+                        if (SDL_GetModState() & KMOD_CTRL) {
+                            incr = slow_seek_interval ? -slow_seek_interval : 1.0;;
+                            goto do_seek;
+                        }
                         incr = seek_interval ? seek_interval : 10.0;
                         goto do_seek;
                     case SDLK_UP:
@@ -3698,6 +3707,10 @@ static const OptionDef options[] = {
     {
         "seek_interval", OPT_TYPE_FLOAT, 0, {&seek_interval}, "set seek interval for left/right keys, in seconds",
         "seconds"
+    },
+    {
+        "slow_seek_interval", OPT_TYPE_FLOAT, 0, {&slow_seek_interval},
+        "set slow seek interval for left/right keys, in seconds","seconds"
     },
     {"nodisp", OPT_TYPE_BOOL, 0, {&display_disable}, "disable graphical display"},
     {"noborder", OPT_TYPE_BOOL, 0, {&borderless}, "borderless window"},
