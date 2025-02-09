@@ -320,6 +320,7 @@ static const char* wanted_stream_spec[AVMEDIA_TYPE_NB] = {0};
 static int seek_by_bytes = -1;
 static float seek_interval = 10;
 static float slow_seek_interval = 1;
+static int exit_code;
 static int display_disable;
 static int borderless;
 static int alwaysontop;
@@ -1316,7 +1317,7 @@ static void do_exit(VideoState* is) {
         printf("\n");
     SDL_Quit();
     av_log(NULL, AV_LOG_QUIET, "%s", "");
-    exit(0);
+    exit(exit_code);
 }
 
 static void sigterm_handler(int sig) {
@@ -3371,10 +3372,15 @@ static void event_loop(VideoState* cur_stream) {
         refresh_loop_wait_event(cur_stream, &event);
         switch (event.type) {
             case SDL_KEYDOWN:
-                if (exit_on_keydown || event.key.keysym.sym == SDLK_ESCAPE || event.key.keysym.sym == SDLK_q) {
+                if (exit_on_keydown || event.key.keysym.sym == SDLK_ESCAPE || event.key.keysym.sym == SDLK_q || event.key.keysym.sym == SDLK_o) {
                     do_exit(cur_stream);
                     break;
                 }
+		if (event.key.keysym.sym == SDLK_d){
+		    exit_code = 1;
+		    do_exit(cur_stream);
+		    break;
+		}
             // If we don't yet have a window, skip all key events, because read_thread might still be initializing...
                 if (!cur_stream->width)
                     continue;
