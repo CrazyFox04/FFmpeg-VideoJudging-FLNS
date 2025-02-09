@@ -320,7 +320,7 @@ static const char* wanted_stream_spec[AVMEDIA_TYPE_NB] = {0};
 static int seek_by_bytes = -1;
 static float seek_interval = 10;
 static float slow_seek_interval = 1;
-static int exit_code = 0;
+static int exit_code;
 static int display_disable;
 static int borderless;
 static int alwaysontop;
