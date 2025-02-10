@@ -355,6 +355,8 @@ static int filter_nbthreads = 0;
 static int enable_vulkan = 0;
 static char* vulkan_params = NULL;
 static const char* hwaccel = NULL;
+static int recordId;
+static char* videoCentralUrl;
 
 /* current context */
 static int is_full_screen;
@@ -3385,6 +3387,14 @@ static void event_loop(VideoState* cur_stream) {
                 if (!cur_stream->width)
                     continue;
                 switch (event.key.keysym.sym) {
+                    case SDLK_b:
+                        if (videoCentralUrl && recordId) {
+                            char* command = av_asprintf("curl -x post %s/api/bookmark/recording/%d/%f?lane=999 >& /dev/null", videoCentralUrl, recordId,
+                                                     get_master_clock(cur_stream));
+                            if (!system(command))
+                                av_log(NULL, AV_LOG_INFO, "\nBookmark created at %f\n", get_master_clock(cur_stream));
+                        }
+                        break;
                     case SDLK_f:
                         toggle_full_screen(cur_stream);
                         cur_stream->force_refresh = 1;
@@ -3454,7 +3464,7 @@ static void event_loop(VideoState* cur_stream) {
                         goto do_seek;
                     case SDLK_RIGHT:
                         if (SDL_GetModState() & KMOD_CTRL) {
-                            incr = slow_seek_interval ? slow_seek_interval : 1.0;;
+                            incr = slow_seek_interval ? slow_seek_interval : 1.0;
                             goto do_seek;
                         }
                         incr = seek_interval ? seek_interval : 10.0;
@@ -3771,6 +3781,8 @@ static const OptionDef options[] = {
         "vulkan configuration using a list of key=value pairs separated by ':'"
     },
     {"hwaccel", OPT_TYPE_STRING, OPT_EXPERT, {&hwaccel}, "use HW accelerated decoding"},
+    {"recordId", OPT_TYPE_INT, OPT_VJ, {&recordId}, "id of the record to play", "xxx integer"},
+    {"vc", OPT_TYPE_STRING, OPT_VJ, {&videoCentralUrl}, "url of videoCentral", "http url"},
     {NULL,},
 };
 
