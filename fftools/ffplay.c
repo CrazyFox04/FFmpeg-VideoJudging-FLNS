@@ -3454,7 +3454,7 @@ static void event_loop(VideoState* cur_stream) {
                         goto do_seek;
                     case SDLK_RIGHT:
                         if (SDL_GetModState() & KMOD_CTRL) {
-                            incr = slow_seek_interval ? -slow_seek_interval : 1.0;;
+                            incr = slow_seek_interval ? slow_seek_interval : 1.0;;
                             goto do_seek;
                         }
                         incr = seek_interval ? seek_interval : 10.0;
