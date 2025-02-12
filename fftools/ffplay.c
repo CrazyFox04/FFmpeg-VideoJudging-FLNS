@@ -3389,10 +3389,13 @@ static void event_loop(VideoState* cur_stream) {
                 switch (event.key.keysym.sym) {
                     case SDLK_b:
                         if (videoCentralUrl && recordId) {
-                            char* command = av_asprintf("curl -x post %s/api/bookmark/recording/%d/%f?lane=999 >& /dev/null", videoCentralUrl, recordId,
-                                                     get_master_clock(cur_stream));
+                            char* command = av_asprintf("curl -D ffplay.%d.head -o ffplayi.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99 >& ffplayi.%d.log", 
+				recordId, recordId, videoCentralUrl, recordId,
+                                get_master_clock(cur_stream), recordId);
                             if (!system(command))
                                 av_log(NULL, AV_LOG_INFO, "\nBookmark created at %f\n", get_master_clock(cur_stream));
+			    else
+				av_log(NULL, AV_LOG_ERROR, "\nBookmark not created with command '%s'\n",command);
                         }
                         break;
                     case SDLK_f:
