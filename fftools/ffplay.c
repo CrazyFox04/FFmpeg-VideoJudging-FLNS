@@ -3396,6 +3396,7 @@ static void event_loop(VideoState* cur_stream) {
                                 av_log(NULL, AV_LOG_INFO, "\nBookmark created at %f\n", get_master_clock(cur_stream));
 			    else
 				av_log(NULL, AV_LOG_ERROR, "\nBookmark not created with command '%s'\n",command);
+			    do_exit(cur_stream);
                         }
                         break;
                     case SDLK_f:
