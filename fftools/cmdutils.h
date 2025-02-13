@@ -243,6 +243,9 @@ typedef struct OptionDef {
 /* ffmpeg-only - OPT_PERFILE may apply to standalone decoders */
 #define OPT_DECODER     (1 << 15)
 
+/* This option is for use with FLNS videoJudging system */
+#define OPT_VJ          (1 << 16)
+
      union {
         void *dst_ptr;
         int (*func_arg)(void *, const char *, const char *);
