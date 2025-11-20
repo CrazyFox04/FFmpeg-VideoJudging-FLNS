@@ -3796,7 +3796,7 @@ static const OptionDef options[] = {
     },
     {"hwaccel", OPT_TYPE_STRING, OPT_EXPERT, {&hwaccel}, "use HW accelerated decoding"},
     {"recordId", OPT_TYPE_INT, OPT_VJ, {&recordId}, "id of the record to play", "xxx integer"},
-    {"bookmarkId", OPT_TYPE_INT, OPT_VJ, {&bookmarkId}, "id of the record to play", "xxx integer"},
+    {"bookmarkId", OPT_TYPE_INT, OPT_VJ, {&bookmarkId}, "id of the bookmark to play", "xxx integer"},
     {"vc", OPT_TYPE_STRING, OPT_VJ, {&videoCentralUrl}, "url of videoCentral", "http url"},
     {NULL,},
 };
