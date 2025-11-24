@@ -356,6 +356,7 @@ static int enable_vulkan = 0;
 static char* vulkan_params = NULL;
 static const char* hwaccel = NULL;
 static int recordId;
+static int bookmarkId;
 static char* videoCentralUrl;
 
 /* current context */
@@ -3379,8 +3380,17 @@ static void event_loop(VideoState* cur_stream) {
                     break;
                 }
 		if (event.key.keysym.sym == SDLK_d){
-		    exit_code = 1;
-		    do_exit(cur_stream);
+                    if (videoCentralUrl && bookmarkId) {
+                        char* command = av_asprintf("curl -D ffplay.%d.head -o ffplayi.%d.out -X POST %s/api/bookmark/%d/timestamp/%.0f >& ffplayi.%d.log", 
+		            bookmarkId, bookmarkId, videoCentralUrl, bookmarkId,
+                                get_master_clock(cur_stream), recordId);
+                        if (!system(command))
+                            av_log(NULL, AV_LOG_INFO, "\nBookmark timestamp changed for %f\n", get_master_clock(cur_stream));
+			else
+			    av_log(NULL, AV_LOG_ERROR, "\nBookmark timestamp not changed '%s'\n",command);
+		        exit_code = 1;
+		        do_exit(cur_stream);
+                    }
 		    break;
 		}
             // If we don't yet have a window, skip all key events, because read_thread might still be initializing...
@@ -3474,10 +3484,10 @@ static void event_loop(VideoState* cur_stream) {
                         incr = seek_interval ? seek_interval : 10.0;
                         goto do_seek;
                     case SDLK_UP:
-                        incr = 60.0;
+                        incr = 2.0;
                         goto do_seek;
                     case SDLK_DOWN:
-                        incr = -60.0;
+                        incr = -2.0;
                     do_seek:
                         if (seek_by_bytes) {
                             pos = -1;
@@ -3786,6 +3796,7 @@ static const OptionDef options[] = {
     },
     {"hwaccel", OPT_TYPE_STRING, OPT_EXPERT, {&hwaccel}, "use HW accelerated decoding"},
     {"recordId", OPT_TYPE_INT, OPT_VJ, {&recordId}, "id of the record to play", "xxx integer"},
+    {"bookmarkId", OPT_TYPE_INT, OPT_VJ, {&bookmarkId}, "id of the bookmark to play", "xxx integer"},
     {"vc", OPT_TYPE_STRING, OPT_VJ, {&videoCentralUrl}, "url of videoCentral", "http url"},
     {NULL,},
 };
