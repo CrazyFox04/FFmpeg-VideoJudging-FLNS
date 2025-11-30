@@ -3389,15 +3389,19 @@ static void event_loop(VideoState* cur_stream) {
                 switch (event.key.keysym.sym) {
                     case SDLK_b:
                         if (videoCentralUrl && recordId) {
-                            char* command = av_asprintf("curl -D ffplay.%d.head -o ffplayi.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99 >& ffplayi.%d.log", 
+                            char* command = av_asprintf("/usr/bin/curl -D /home/flns/VAR/ffplay.%d.head -o /home/flns/VAR/ffplayi.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99", 
 				recordId, recordId, videoCentralUrl, recordId,
                                 get_master_clock(cur_stream), recordId);
+			    printf("Creating bookmark with %s\n",command);
                             if (!system(command))
                                 av_log(NULL, AV_LOG_INFO, "\nBookmark created at %f\n", get_master_clock(cur_stream));
 			    else
 				av_log(NULL, AV_LOG_ERROR, "\nBookmark not created with command '%s'\n",command);
-			    do_exit(cur_stream);
-                        }
+			    //We do not exit so multiple bookmarks can be created on one stream
+			    //do_exit(cur_stream);
+                        }else{
+				printf("not configure for bookmark\n");
+			}
                         break;
                     case SDLK_f:
                         toggle_full_screen(cur_stream);
@@ -3909,7 +3913,7 @@ static void create_show_window() {
 int main(int argc, char** argv) {
     int flags, ret;
     VideoState* is;
-
+    printf("This is custom build from EGMM - October 2025\n");
     ret = parse_options(NULL, argc, argv, options, opt_input_file);
     parse_loglevel(argc, argv, options);
     create_show_window();
