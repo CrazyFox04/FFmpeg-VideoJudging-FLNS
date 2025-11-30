@@ -3379,39 +3379,39 @@ static void event_loop(VideoState* cur_stream) {
                     do_exit(cur_stream);
                     break;
                 }
-		if (event.key.keysym.sym == SDLK_d){
+		        if (event.key.keysym.sym == SDLK_d){
                     if (videoCentralUrl && bookmarkId) {
-                        char* command = av_asprintf("curl -D ffplay.%d.head -o ffplayi.%d.out -X POST %s/api/bookmark/%d/timestamp/%.0f >& ffplayi.%d.log", 
+                        char* command = av_asprintf("/usr/bin/curl -D /home/flns/VAR/ffplay.%d.head -o /home/flns/VAR/ffplayi.%d.out -X POST %s/api/bookmark/%d/timestamp/%.0f >& /home/flns/VAR/ffplay.%d.log",
 		            bookmarkId, bookmarkId, videoCentralUrl, bookmarkId,
                                 get_master_clock(cur_stream), recordId);
                         if (!system(command))
                             av_log(NULL, AV_LOG_INFO, "\nBookmark timestamp changed for %f\n", get_master_clock(cur_stream));
-			else
-			    av_log(NULL, AV_LOG_ERROR, "\nBookmark timestamp not changed '%s'\n",command);
-		        exit_code = 1;
-		        do_exit(cur_stream);
+			            else
+			                av_log(NULL, AV_LOG_ERROR, "\nBookmark timestamp not changed '%s'\n",command);
+		                exit_code = 1;
+		                do_exit(cur_stream);
                     }
-		    break;
-		}
-            // If we don't yet have a window, skip all key events, because read_thread might still be initializing...
+		            break;
+		        }
+                // If we don't yet have a window, skip all key events, because read_thread might still be initializing...
                 if (!cur_stream->width)
                     continue;
                 switch (event.key.keysym.sym) {
                     case SDLK_b:
                         if (videoCentralUrl && recordId) {
-                            char* command = av_asprintf("/usr/bin/curl -D /home/flns/VAR/ffplay.%d.head -o /home/flns/VAR/ffplayi.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99", 
+                            char* command = av_asprintf("/usr/bin/curl -D /home/flns/VAR/ffplay.%d.head -o /home/flns/VAR/ffplay.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99",
 				recordId, recordId, videoCentralUrl, recordId,
                                 get_master_clock(cur_stream), recordId);
 			    printf("Creating bookmark with %s\n",command);
                             if (!system(command))
                                 av_log(NULL, AV_LOG_INFO, "\nBookmark created at %f\n", get_master_clock(cur_stream));
-			    else
-				av_log(NULL, AV_LOG_ERROR, "\nBookmark not created with command '%s'\n",command);
-			    //We do not exit so multiple bookmarks can be created on one stream
-			    //do_exit(cur_stream);
+			                else
+    				            av_log(NULL, AV_LOG_ERROR, "\nBookmark not created with command '%s'\n",command);
+			                //We do not exit so multiple bookmarks can be created on one stream
+			                //do_exit(cur_stream);
                         }else{
-				printf("not configure for bookmark\n");
-			}
+				            printf("not configure for bookmark\n");
+			            }
                         break;
                     case SDLK_f:
                         toggle_full_screen(cur_stream);
