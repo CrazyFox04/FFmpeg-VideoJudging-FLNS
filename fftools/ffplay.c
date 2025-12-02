@@ -3924,7 +3924,7 @@ static void create_show_window() {
 int main(int argc, char** argv) {
     int flags, ret;
     VideoState* is;
-    printf("This is custom build from EGMM - October 2025\n");
+    printf("This is custom build from EGMM - November 2025\n");
     ret = parse_options(NULL, argc, argv, options, opt_input_file);
     parse_loglevel(argc, argv, options);
     create_show_window();
