@@ -357,9 +357,9 @@ static char* vulkan_params = NULL;
 static const char* hwaccel = NULL;
 static int recordId;
 static int bookmarkId;
-static const char* curlCommand;
-static const char* logPath;
-static const char* videoCentralUrl;
+static char* curlCommand= NULL;
+static char* logPath = NULL;
+static char* videoCentralUrl = NULL;
 
 /* current context */
 static int is_full_screen;
@@ -3381,49 +3381,61 @@ static void event_loop(VideoState* cur_stream) {
                     do_exit(cur_stream);
                     break;
                 }
-		        if (event.key.keysym.sym == SDLK_d){
-                    if (videoCentralUrl && bookmarkId) {
-                        char* command = av_asprintf("%s -D %s/ffplay.%d.head -o %s/ffplay.%d.out -X POST %s/api/bookmark/%d/timestamp/%.0f >& %s/ffplay.%d.log",
+                if (event.key.keysym.sym == SDLK_d){
+                    char* command = NULL;
+                    if (videoCentralUrl != NULL && bookmarkId != NULL) {
+                        command = av_asprintf("%s -D %s/ffplay.%d.head -o %s/ffplay.%d.out -X POST %s/api/bookmark/%d/timestamp/%.0f >& %s/ffplay.%d.log",
 		                        curlCommand,
                                 logPath, bookmarkId,
                                 logPath, bookmarkId,
                                 videoCentralUrl, bookmarkId, get_master_clock(cur_stream),
                                 logPath, recordId);
-                        if (!system(command)){
+                        if (command != NULL && !system(command))
                             av_log(NULL, AV_LOG_INFO, "\nBookmark timestamp changed for %f\n", get_master_clock(cur_stream));
-			            }else{
-			                av_log(NULL, AV_LOG_ERROR, "\nBookmark timestamp not changed '%s'\n",command);
-						}
-						av_free(command);
-		                exit_code = 1;
-		                do_exit(cur_stream);
+                    }else{
+                        av_log(NULL, AV_LOG_ERROR, "\nBookmark timestamp not changed '%s'\n",command);
                     }
-		            break;
-		        }
+                    if (command != NULL) {
+                        av_free(command);
+                    }
+                    exit_code = 1;
+                    do_exit(cur_stream);
+                    break;
+                }
                 // If we don't yet have a window, skip all key events, because read_thread might still be initializing...
                 if (!cur_stream->width)
                     continue;
                 switch (event.key.keysym.sym) {
                     case SDLK_b:
+                        char* command = NULL;
                         if (videoCentralUrl && recordId) {
-                            char* command = av_asprintf("%s -D %s/ffplay.%d.head -o %s/ffplay.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99 >& %s/ffplay.%d.log",
-				                curlCommand,
+                            command = av_asprintf("%s -D %s/ffplay.%d.head -o %s/ffplay.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99 >& %s/ffplay.%d.log",
+                                curlCommand,
                                 logPath, recordId,
                                 logPath, recordId,
                                 videoCentralUrl, recordId, get_master_clock(cur_stream),
                                 logPath, recordId);
-			    			printf("Creating bookmark with %s\n",command);
-                            if (!system(command)){
-                                av_log(NULL, AV_LOG_INFO, "\nBookmark created at %f\n", get_master_clock(cur_stream));
-			                }else{
-    				            av_log(NULL, AV_LOG_ERROR, "\nBookmark not created with command '%s'\n",command);
-							}
-							av_free(command);
-			                //We do not exit so multiple bookmarks can be created on one stream
-			                //do_exit(cur_stream);
+
+                        if (command != NULL) {
+                            printf("Creating bookmark with %s\n", command);
+
+                            if (!system(command)) {
+                                av_log(NULL, AV_LOG_INFO,
+                                "\nBookmark created at %f\n",
+                                get_master_clock(cur_stream));
+                            } else {
+                                av_log(NULL, AV_LOG_ERROR,
+                                "\nBookmark not created with command '%s'\n",
+                                command);
+                            }
                         }else{
-				            printf("not configured for bookmark\n");
-			            }
+                            printf("not configured for bookmark\n");
+                        }
+
+                        if (command != NULL) {
+                          av_free(command);
+                        }
+
                         break;
                     case SDLK_f:
                         toggle_full_screen(cur_stream);
