@@ -357,7 +357,9 @@ static char* vulkan_params = NULL;
 static const char* hwaccel = NULL;
 static int recordId;
 static int bookmarkId;
-static char* videoCentralUrl;
+static char* curlCommand= NULL;
+static char* logPath = NULL;
+static char* videoCentralUrl = NULL;
 
 /* current context */
 static int is_full_screen;
@@ -3379,39 +3381,59 @@ static void event_loop(VideoState* cur_stream) {
                     do_exit(cur_stream);
                     break;
                 }
-		if (event.key.keysym.sym == SDLK_d){
-                    if (videoCentralUrl && bookmarkId) {
-                        char* command = av_asprintf("curl -D ffplay.%d.head -o ffplayi.%d.out -X POST %s/api/bookmark/%d/timestamp/%.0f >& ffplayi.%d.log", 
-		            bookmarkId, bookmarkId, videoCentralUrl, bookmarkId,
-                                get_master_clock(cur_stream), recordId);
-                        if (!system(command))
+		        if (event.key.keysym.sym == SDLK_d){
+                    char* command = NULL;
+                    if (videoCentralUrl != NULL && bookmarkId != NULL) {
+                        command = av_asprintf("%s -D %s/ffplay.%d.head -o %s/ffplay.%d.out -X POST %s/api/bookmark/%d/timestamp/%.0f >& %s/ffplay.%d.log",
+		                        curlCommand,
+                                logPath, bookmarkId,
+                                logPath, bookmarkId,
+                                videoCentralUrl, bookmarkId, get_master_clock(cur_stream),
+                                logPath, recordId);
+                        if (command != NULL && !system(command))
                             av_log(NULL, AV_LOG_INFO, "\nBookmark timestamp changed for %f\n", get_master_clock(cur_stream));
-			else
-			    av_log(NULL, AV_LOG_ERROR, "\nBookmark timestamp not changed '%s'\n",command);
-		        exit_code = 1;
-		        do_exit(cur_stream);
+			            else
+			                av_log(NULL, AV_LOG_ERROR, "\nBookmark timestamp not changed '%s'\n",command);
+                      if (command != NULL) {
+                        free(command);
+                      }
+		                exit_code = 1;
+		                do_exit(cur_stream);
                     }
-		    break;
-		}
-            // If we don't yet have a window, skip all key events, because read_thread might still be initializing...
+                  if (command != NULL) {
+                    free(command);
+                  }
+		            break;
+		        }
+                // If we don't yet have a window, skip all key events, because read_thread might still be initializing...
                 if (!cur_stream->width)
                     continue;
                 switch (event.key.keysym.sym) {
                     case SDLK_b:
+                        char* command = NULL;
                         if (videoCentralUrl && recordId) {
-                            char* command = av_asprintf("/usr/bin/curl -D /home/flns/VAR/ffplay.%d.head -o /home/flns/VAR/ffplayi.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99", 
-				recordId, recordId, videoCentralUrl, recordId,
-                                get_master_clock(cur_stream), recordId);
+                            command = av_asprintf("%s -D %s/ffplay.%d.head -o %s/ffplay.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99 >& %s/ffplay.%d.log",
+				                curlCommand,
+                                logPath, recordId,
+                                logPath, recordId,
+                                videoCentralUrl, recordId, get_master_clock(cur_stream),
+                                logPath, recordId);
 			    printf("Creating bookmark with %s\n",command);
-                            if (!system(command))
+                            if (command != NULL && !system(command))
                                 av_log(NULL, AV_LOG_INFO, "\nBookmark created at %f\n", get_master_clock(cur_stream));
-			    else
-				av_log(NULL, AV_LOG_ERROR, "\nBookmark not created with command '%s'\n",command);
-			    //We do not exit so multiple bookmarks can be created on one stream
-			    //do_exit(cur_stream);
+			                else
+    				            av_log(NULL, AV_LOG_ERROR, "\nBookmark not created with command '%s'\n",command);
+                        if (command != NULL) {
+                          free(command);
+                        }
+			                //We do not exit so multiple bookmarks can be created on one stream
+			                //do_exit(cur_stream);
                         }else{
-				printf("not configure for bookmark\n");
-			}
+                    if (command != NULL) {
+                      free(command);
+                    }
+				            printf("not configure for bookmark\n");
+			            }
                         break;
                     case SDLK_f:
                         toggle_full_screen(cur_stream);
@@ -3801,7 +3823,9 @@ static const OptionDef options[] = {
     {"hwaccel", OPT_TYPE_STRING, OPT_EXPERT, {&hwaccel}, "use HW accelerated decoding"},
     {"recordId", OPT_TYPE_INT, OPT_VJ, {&recordId}, "id of the record to play", "xxx integer"},
     {"bookmarkId", OPT_TYPE_INT, OPT_VJ, {&bookmarkId}, "id of the bookmark to play", "xxx integer"},
-    {"vc", OPT_TYPE_STRING, OPT_VJ, {&videoCentralUrl}, "url of videoCentral", "http url"},
+    {"curlCommand", OPT_TYPE_STRING, OPT_VJ, {&curlCommand}, "full path for curl command", "default: /usr/bin/curl"},
+    {"logPath", OPT_TYPE_STRING, OPT_VJ, {&logPath}, "full path for log", "default: ."},
+    {"vc", OPT_TYPE_STRING, OPT_VJ, {&videoCentralUrl}, "url of videoCentral", "default: http://localhost:8765/"},
     {NULL,},
 };
 
@@ -3924,8 +3948,18 @@ static void create_show_window() {
 int main(int argc, char** argv) {
     int flags, ret;
     VideoState* is;
-    printf("This is custom build from EGMM - October 2025\n");
+    printf("This is custom build from EGMM - November 2025\n");
     ret = parse_options(NULL, argc, argv, options, opt_input_file);
+    // set default values in case the string is not provided to the command
+    if (curlCommand == NULL || curlCommand[0] == '\0') {
+        curlCommand = "/usr/bin/curl";
+    }
+    if (videoCentralUrl == NULL || videoCentralUrl[0] == '\0') {
+        videoCentralUrl = "http://localhost:8765";
+    }
+    if (logPath == NULL || logPath[0] == '\0') {
+        logPath = ".";
+    }
     parse_loglevel(argc, argv, options);
     create_show_window();
     
