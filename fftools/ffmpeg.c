@@ -945,7 +945,7 @@ static int64_t getmaxrss(void)
 
 int main(int argc, char **argv)
 {
-    printf("Custom build EGMM - October 2025\n");
+    printf("Custom build EGMM - January 2026\n");
     Scheduler *sch = NULL;
 
     int ret;
