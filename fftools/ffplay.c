@@ -357,9 +357,9 @@ static char* vulkan_params = NULL;
 static const char* hwaccel = NULL;
 static int recordId;
 static int bookmarkId;
-static char* curlCommand;
-static char* logPath;
-static char* videoCentralUrl;
+static const char* curlCommand;
+static const char* logPath;
+static const char* videoCentralUrl;
 
 /* current context */
 static int is_full_screen;
@@ -3389,10 +3389,12 @@ static void event_loop(VideoState* cur_stream) {
                                 logPath, bookmarkId,
                                 videoCentralUrl, bookmarkId, get_master_clock(cur_stream),
                                 logPath, recordId);
-                        if (!system(command))
+                        if (!system(command)){
                             av_log(NULL, AV_LOG_INFO, "\nBookmark timestamp changed for %f\n", get_master_clock(cur_stream));
-			            else
+			            }else{
 			                av_log(NULL, AV_LOG_ERROR, "\nBookmark timestamp not changed '%s'\n",command);
+						}
+						av_free(command);
 		                exit_code = 1;
 		                do_exit(cur_stream);
                     }
@@ -3410,15 +3412,17 @@ static void event_loop(VideoState* cur_stream) {
                                 logPath, recordId,
                                 videoCentralUrl, recordId, get_master_clock(cur_stream),
                                 logPath, recordId);
-			    printf("Creating bookmark with %s\n",command);
-                            if (!system(command))
+			    			printf("Creating bookmark with %s\n",command);
+                            if (!system(command)){
                                 av_log(NULL, AV_LOG_INFO, "\nBookmark created at %f\n", get_master_clock(cur_stream));
-			                else
+			                }else{
     				            av_log(NULL, AV_LOG_ERROR, "\nBookmark not created with command '%s'\n",command);
+							}
+							av_free(command);
 			                //We do not exit so multiple bookmarks can be created on one stream
 			                //do_exit(cur_stream);
                         }else{
-				            printf("not configure for bookmark\n");
+				            printf("not configured for bookmark\n");
 			            }
                         break;
                     case SDLK_f:
@@ -3934,7 +3938,7 @@ static void create_show_window() {
 int main(int argc, char** argv) {
     int flags, ret;
     VideoState* is;
-    printf("This is custom build from EGMM - November 2025\n");
+    printf("This is custom build from EGMM - January 2026\n");
     ret = parse_options(NULL, argc, argv, options, opt_input_file);
     // set default values in case the string is not provided to the command
     if (curlCommand == NULL || curlCommand[0] == '\0') {
