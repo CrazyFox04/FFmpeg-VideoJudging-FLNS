@@ -3543,8 +3543,6 @@ static void event_loop(VideoState* cur_stream) {
                             stream_seek(cur_stream, (int64_t)(pos * AV_TIME_BASE), (int64_t)(incr * AV_TIME_BASE), 0);
                         }
                         break;
-                    default:
-                        break;
                 }
                 break;
             case SDL_MOUSEBUTTONDOWN:
@@ -3627,6 +3625,7 @@ static void event_loop(VideoState* cur_stream) {
             default:
                 break;
         }
+    }
     }
 }
 
