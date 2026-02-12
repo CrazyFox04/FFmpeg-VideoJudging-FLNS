@@ -3384,7 +3384,7 @@ static void event_loop(VideoState* cur_stream) {
 		        if (event.key.keysym.sym == SDLK_d){
                     char* command = NULL;
                     if (videoCentralUrl != NULL && bookmarkId != NULL) {
-                        command = av_asprintf("%s -D %s/ffplay.%d.head -o %s/ffplay.%d.out -X POST %s/api/bookmark/%d/timestamp/%.0f >& %s/ffplay.%d.log",
+                        command = av_asprintf("%s -D %s/ffplay.%d.head -o %s/ffplay.%d.out -X POST %s/api/bookmark/%d/timestamp/%.0f > %s/ffplay.%d.log",
 		                        curlCommand,
                                 logPath, bookmarkId,
                                 logPath, bookmarkId,
@@ -3412,7 +3412,7 @@ static void event_loop(VideoState* cur_stream) {
                     case SDLK_b:
                         char* command = NULL;
                         if (videoCentralUrl && recordId) {
-                            command = av_asprintf("%s -D %s/ffplay.%d.head -o %s/ffplay.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99 >& %s/ffplay.%d.log",
+                            command = av_asprintf("%s -D %s/ffplay.%d.head -o %s/ffplay.%d.out -X POST %s/api/bookmark/recording/%d/%.0f?lane=99 > %s/ffplay.%d.log",
 				                curlCommand,
                                 logPath, recordId,
                                 logPath, recordId,
